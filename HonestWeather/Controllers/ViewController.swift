@@ -15,8 +15,8 @@ class ViewController: UIViewController {
   @IBOutlet weak var ShortDescription: UILabel!
   let locationManager = CLLocationManager()
 
-  var longitude:Double = 0
-  var latitude:Double = 0
+  var longitude:Double?
+  var latitude:Double?
 
   override func viewDidLoad() {
     super.viewDidLoad()
@@ -26,8 +26,16 @@ class ViewController: UIViewController {
   }
 
   func getWeather() -> Void {
-    if (longitude != 0 && latitude != 0) {
-      AF.request("https://api.openweathermap.org/data/2.5/weather?lat=\(latitude)&lon=\(longitude)&appid=\(API_KEY)&units=metric").responseJSON { response in
+    if let longitude = longitude && let latitude = latitude {
+      
+      let params = [
+        "lat":"\(latitude)",
+        "lon":"\(longitude)",
+        "appid":"API_KEY",
+        "units":"metric"
+      ]
+      
+      AF.request("https://api.openweathermap.org/data/2.5/weather", parameters: params, method: .get).responseJSON { response in
         let json = JSON(response.data!)
 
         self.ShortDescription.text = WeatherDescriptions.shortDescription(weather: json)
@@ -41,7 +49,7 @@ class ViewController: UIViewController {
   func requestLocationPermission() -> Bool {
     var status = CLLocationManager.authorizationStatus()
 
-    if(status == .notDetermined){
+    if status == .notDetermined{
       locationManager.requestWhenInUseAuthorization()
       status = CLLocationManager.authorizationStatus()
     }
